@@ -17,7 +17,7 @@ namespace Canvas
         {
 
         }
-
+        //Log try gitGHub
         public Line(float x1, float y1, float x2, float y2)
         {
             _x1 = x1;
