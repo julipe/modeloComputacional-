@@ -32,17 +32,19 @@ namespace Canvas
                     Console.Clear();
 
                 switch (myMenu)
-                {   
-                    
+                {
+
                     case "0":
+                        Console.WriteLine(" ----------------------------------------------------------------------");
                         Console.WriteLine(" 1 - Generar Canvas");
                         Console.WriteLine(" 2- Serializar documento");
                         Console.WriteLine(" 3- Deserializar documento");
                         Console.WriteLine(" 4- Modificar con XSLT");
                         Console.WriteLine(" 5- Abrir en Navegador");
-                        Console.WriteLine(" 6- Elegir opción:");
-                        Console.WriteLine(" 7- Salir");
-       
+                        Console.WriteLine(" 6- Salir");
+                        Console.WriteLine(" -- Elija una opción --");
+                        Console.WriteLine(" ----------------------------------------------------------------------");
+
                         myMenu = Console.ReadLine();
                         break;
                     case "1":
@@ -65,13 +67,17 @@ namespace Canvas
                         action.openInNavigator();
                         myMenu = "0";
                         break;
+                    case "6":
+                        onRun = false;
+                        myMenu = "0";
+                        break;
                     default:
                         Console.WriteLine("Opción incorrecta");
                         myMenu = "0";
                         break;
 
-                }   
-            }            
+                }
+            }
         }
 
         static string RootDirectory = Path.Combine(
@@ -84,6 +90,9 @@ namespace Canvas
         {
             public Actions() { }
 
+            /// <summary>
+            /// Agrega todas las figuras al objeto Canvas
+            /// </summary>
             public Canvas generateCanvas()
             {
                 try
@@ -97,6 +106,8 @@ namespace Canvas
                     canvas.Add(new Rectangle(200, 90, 400, 20));
                     canvas.Add(new Circle(new Point(50, 50), 30));
                     canvas.Add(new Circle(new Point(200, 180), 70));
+
+                    //Estrella
                     canvas.Add(new Line(750, 700, 721, 790));
                     canvas.Add(new Line(721, 790, 798, 735));
                     canvas.Add(new Line(798, 735, 702, 735));
@@ -110,11 +121,14 @@ namespace Canvas
                 {
                     Console.WriteLine("Error: " + ex.ToString());
                     return null;
-                }            
+                }
             }
 
-            public void sertializeCanvas(Canvas _canvas,string canvas_name, string pathFile)
-            {   
+            /// <summary>
+            /// Serializa el objeto Canvas
+            /// </summary>
+            public void sertializeCanvas(Canvas _canvas, string canvas_name, string pathFile)
+            {
                 CanvasSerializer serializer = new CanvasSerializer();
 
                 var serialization = serializer.Serialize(_canvas, canvas_name);
@@ -130,50 +144,86 @@ namespace Canvas
                 }
 
             }
+
+            /// <summary>
+            ///  Deserializa el archivo XML y lo vuelca al objeto Canvas
+            /// </summary>
             public void deserializeCanvas(string canvas_name)
             {
-                CanvasSerializer serializer = new CanvasSerializer();
-                var deserialization = serializer.Deserialize(canvas_name);
-                Console.WriteLine("\n\nDeserializando documento...");
-  
-                if (deserialization.hasError)
-                    Console.WriteLine("-Error al deserializar el documento :: " + deserialization.error);
-                else
-                    Console.WriteLine("-Documento deserializador correctamente");
+                try
+                {
+                    CanvasSerializer serializer = new CanvasSerializer();
+                    var deserialization = serializer.Deserialize(canvas_name);
+                    Console.WriteLine("\n\nDeserializando documento...");
 
-                deserialization.canvas.Draw();
-                deserialization.canvas.SendToFront();
+                    if (deserialization.hasError)
+                        Console.WriteLine("-Error al deserializar el documento :: " + deserialization.error);
+                    else
+                        Console.WriteLine("-Documento deserializador correctamente");
 
+                    deserialization.canvas.Draw();
+                    deserialization.canvas.SendToFront();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
+
+
+            /// <summary>
+            /// Muestra en pantalla la descripción de los objetos
+            /// </summary>
             public void DrawPresentation()
             {
                 try
                 {
-                    string text = System.IO.File.ReadAllText(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "description.txt"));
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    System.Console.WriteLine(text);
+                    Random r = new Random();
+                    Console.ForegroundColor = (ConsoleColor)r.Next(6, 16);
+                
+                    string line;
+                    StreamReader file = new StreamReader(Path.Combine(@"../../description.txt"));
+                    while ((line = file.ReadLine()) != null)
+                    {
+                        System.Console.WriteLine(line);
+                    }
+
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error: " + ex.ToString());
+                    Console.WriteLine(ex.Message);
                 }
             }
 
+            /// <summary>
+            /// Transforma es archivo XML -> HTML mediante XSLT
+            /// </summary>
             public void mutataInXSLT()
             {
-                string path = string.Empty;
-                string internal_path = Path.Combine(Directory.GetCurrentDirectory(), "modify.xslt");
-                string pathOutput = Path.Combine(RootDirectory, "result.html");
-                XPathDocument myXPathDoc = new XPathDocument(Path.Combine(RootDirectory, "test.xml"));
-                XslCompiledTransform trans = new XslCompiledTransform();
-                trans.Load(internal_path);
-                XmlTextWriter myWriter = new XmlTextWriter(pathOutput, null);
-                trans.Transform(myXPathDoc, null, myWriter);
-                myWriter.Close();
-             
+                try
+                {
+                    string path = string.Empty;
+                    string internal_path = Path.Combine(@"../../modifier.xslt");
+                    string pathOutput = Path.Combine(RootDirectory, "result.html");
+                    XPathDocument myXPathDoc = new XPathDocument(Path.Combine(RootDirectory, "test.xml"));
+                    XslCompiledTransform trans = new XslCompiledTransform();
+                    trans.Load(internal_path);
+                    XmlTextWriter myWriter = new XmlTextWriter(pathOutput, null);
+                    trans.Transform(myXPathDoc, null, myWriter);
+                    myWriter.Close();
 
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
+
+            /// <summary>
+            /// Abre el archivo generado en el navegador
+            /// </summary>
             public void openInNavigator()
             {
                 Process myProcess = new Process();
