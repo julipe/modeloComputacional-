@@ -21,7 +21,7 @@
             <line x1="{_x1}" y1="{_y1}" x2="{_x2}" y2="{_y2}" style="stroke:rgb(255,0,0);stroke-width:2" />
           </xsl:when>
           <xsl:when test="@xsi:type='Rectangle'">
-            <rect x="{_x1}" y="{_y1}" width="150" height="150" style="fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9" />
+            <rect x="{_x1}" y="{_y1}" width="{_x1 + _x2}" height="{_y1 + _y2}" style="fill:blue;stroke:pink;stroke-width:5;fill-opacity:0.1;stroke-opacity:0.9" />
           </xsl:when>
           <xsl:when test="@xsi:type='Point'">
             <circle cx="{_x}" cy="{_y}" r="2" stroke="green" stroke-width="4" fill="red" />
